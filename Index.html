@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CousinIve - Simple Software Tools for Work</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #1F2933;
+            background: #F7F8FA;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            padding: 20px 0;
+            background: #fff;
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1F2933;
+        }
+
+        .hero {
+            background: #fff;
+            padding: 80px 0 60px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 20px;
+            color: #6B7280;
+            margin-bottom: 32px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-group {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .btn {
+            padding: 14px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 8px;
+            cursor: pointer;
+            border: none;
+            display: inline-block;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #2C4FD8;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #1E3FBF;
+        }
+
+        .hero-note {
+            font-size: 14px;
+            color: #6B7280;
+        }
+
+        .section {
+            padding: 60px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 48px;
+        }
+
+        .how-it-works {
+            background: #fff;
+            border-top: 1px solid rgba(0,0,0,0.06);
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+            padding: 60px 0;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 40px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .step {
+            text-align: center;
+        }
+
+        .step-icon {
+            width: 56px;
+            height: 56px;
+            background: #F0F4FF;
+            color: #2C4FD8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0 auto 20px;
+        }
+
+        .step h3 {
+            font-size: 20px;
+            margin-bottom: 12px;
+            color: #1F2933;
+        }
+
+        .step p {
+            color: #6B7280;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .app-card {
+            background: #fff;
+            border: 1px solid rgba(0,0,0,0.06);
+            border-radius: 12px;
+            padding: 32px;
+            transition: all 0.2s;
+        }
+
+        .app-card:hover {
+            border-color: rgba(0,0,0,0.12);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+        }
+
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+
+        .app-name {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .app-tag {
+            padding: 4px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .tag-free {
+            background: #F0F4FF;
+            color: #2C4FD8;
+        }
+
+        .tag-paid {
+            background: #F0F4FF;
+            color: #8FA2E8;
+        }
+
+        .tag-new {
+            background: #FFF9E6;
+            color: #C79D3A;
+        }
+
+        .app-description {
+            color: #6B7280;
+            margin-bottom: 16px;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .app-price {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .app-cta {
+            width: 100%;
+        }
+
+        .recommended {
+            border: 2px solid #2C4FD8;
+            position: relative;
+        }
+
+        .recommended::before {
+            content: "START HERE";
+            position: absolute;
+            top: -12px;
+            left: 24px;
+            background: #2C4FD8;
+            color: #fff;
+            padding: 4px 12px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .closing {
+            padding: 50px 0;
+            text-align: center;
+            background: #fff;
+            border-top: 1px solid rgba(0,0,0,0.06);
+        }
+
+        .closing p {
+            font-size: 17px;
+            color: #6B7280;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        footer {
+            padding: 50px 0;
+            text-align: center;
+            background: #F7F8FA;
+        }
+
+        .footer-logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1F2933;
+            margin-bottom: 20px;
+        }
+
+        .footer-contact {
+            font-size: 14px;
+            color: #6B7280;
+        }
+
+        .footer-contact p {
+            margin: 6px 0;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 36px;
+            }
+
+            .hero p {
+                font-size: 18px;
+            }
+
+            .section-title {
+                font-size: 28px;
+            }
+
+            .apps-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .steps {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">CousinIve</div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h1>Simple Software Tools for Everyday Work</h1>
+            <p>Task management, time tracking, invoicing, and productivity tools. Some run in your browser. Others are lightweight downloads. No accounts required for basic tools.</p>
+            <div class="cta-group">
+                <a href="#focus-timer" class="btn btn-primary">Start Here</a>
+            </div>
+            <p class="hero-note">For individuals and small teams</p>
+        </div>
+    </section>
+
+    <section class="how-it-works">
+        <div class="container">
+            <h2 class="section-title">How It Works</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-icon">→</div>
+                    <h3>Choose a Tool</h3>
+                    <p>Select the software tool designed to solve your specific task.</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">✓</div>
+                    <h3>Start Immediately</h3>
+                    <p>Open the tool in your browser or install the app if required. No setup. No friction.</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">⚡</div>
+                    <h3>Get Results</h3>
+                    <p>Save time, reduce manual effort, and stay focused on what matters.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="apps">
+        <div class="container">
+            <h2 class="section-title">Available Tools</h2>
+            <div class="apps-grid">
+                <div class="app-card recommended" id="focus-timer">
+                    <div class="app-header">
+                        <div>
+                            <div class="app-name">FocusTimer</div>
+                        </div>
+                        <span class="app-tag tag-free">Free</span>
+                    </div>
+                    <p class="app-description">A simple timer that helps you track focused work sessions and see how much time you spend on specific tasks.</p>
+                    <div class="app-price">Free</div>
+                    <a href="https://app.example.com/focustimer" class="btn btn-primary app-cta">Open Tool</a>
+                </div>
+
+                <div class="app-card">
+                    <div class="app-header">
+                        <div>
+                            <div class="app-name">TaskFlow</div>
+                        </div>
+                        <span class="app-tag tag-new">New</span>
+                    </div>
+                    <p class="app-description">Create and organize your daily to-do list. Add tasks, mark them complete, and see what needs to get done.</p>
+                    <div class="app-price">$9/mo</div>
+                    <a href="https://app.example.com/taskflow" class="btn btn-primary app-cta">Open Tool</a>
+                </div>
+
+                <div class="app-card">
+                    <div class="app-header">
+                        <div>
+                            <div class="app-name">InvoiceSnap</div>
+                        </div>
+                        <span class="app-tag tag-paid">Paid</span>
+                    </div>
+                    <p class="app-description">Create professional invoices and send them to clients. Track which invoices have been paid and send payment reminders.</p>
+                    <div class="app-price">$15/mo</div>
+                    <a href="https://app.example.com/invoicesnap" class="btn btn-primary app-cta">Open Tool</a>
+                </div>
+
+                <div class="app-card">
+                    <div class="app-header">
+                        <div>
+                            <div class="app-name">LinkHub</div>
+                        </div>
+                        <span class="app-tag tag-paid">Paid</span>
+                    </div>
+                    <p class="app-description">Create a single page with all your important links. Share one link instead of multiple social media profiles and websites.</p>
+                    <div class="app-price">$5/mo</div>
+                    <a href="https://app.example.com/linkhub" class="btn btn-primary app-cta">Open Tool</a>
+                </div>
+
+                <div class="app-card">
+                    <div class="app-header">
+                        <div>
+                            <div class="app-name">EmailClean</div>
+                        </div>
+                        <span class="app-tag tag-paid">Paid</span>
+                    </div>
+                    <p class="app-description">Organize your inbox automatically. Sort newsletters, promotional emails, and spam into separate folders so your inbox stays clean.</p>
+                    <div class="app-price">$12/mo</div>
+                    <a href="https://app.example.com/emailclean" class="btn btn-primary app-cta">Open Tool</a>
+                </div>
+
+                <div class="app-card">
+                    <div class="app-header">
+                        <div>
+                            <div class="app-name">MeetingKit</div>
+                        </div>
+                        <span class="app-tag tag-paid">Paid</span>
+                    </div>
+                    <p class="app-description">Take meeting notes and assign action items. Automatically create summaries you can share with your team after the meeting.</p>
+                    <div class="app-price">$19/mo</div>
+                    <a href="https://app.example.com/meetingkit" class="btn btn-primary app-cta">Open Tool</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="closing">
+        <div class="container">
+            <p>Each tool opens independently. Payments are processed securely per tool when you subscribe. Clear pricing. No unnecessary features.</p>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-logo">CousinIve</div>
+            <div class="footer-contact">
+                <p>cousinive@outlook.com</p>
+                <p>@cousinive on Instagram and X</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
