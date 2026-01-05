@@ -1,0 +1,1847 @@
+apps/stopwatch/index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stopwatch</title>
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            transition: background 0.4s ease;
+        }
+
+        .card {
+            border-radius: 18px;
+            padding: 34px;
+            width: 540px;
+            max-width: 94vw;
+            text-align: center;
+            transition: all 0.4s ease;
+        }
+
+        /* Face Switcher */
+        .face-switcher {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 28px;
+        }
+
+        .face-btn {
+            padding: 6px 10px;
+            border-radius: 14px;
+            border: none;
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .face-btn:active {
+            transform: translateY(1px);
+        }
+
+        .face-btn:focus-visible {
+            outline: 2px solid currentColor;
+            outline-offset: 2px;
+        }
+
+        /* Time Display */
+        .time-container {
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .time-display {
+            font-weight: 500;
+            line-height: 1.0;
+            letter-spacing: -0.02em;
+            font-variant-numeric: tabular-nums;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.3s ease;
+            padding: 8px 0;
+        }
+
+        .time-display:active {
+            transform: scale(0.99);
+        }
+
+        .copied-toast {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 10;
+        }
+
+        .copied-toast.show {
+            opacity: 1;
+        }
+
+        /* Status - only dot visible when running */
+        .status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            min-height: 12px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .status-dot.running {
+            opacity: 1;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.85); }
+        }
+
+        @keyframes sportPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        @keyframes bounce {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        /* Buttons */
+        .buttons {
+            display: flex;
+            gap: 12px;
+            transition: opacity 0.3s ease;
+        }
+
+        .btn {
+            height: 48px;
+            border-radius: 12px;
+            border: none;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            outline: none;
+            flex: 1;
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translateY(1px);
+        }
+
+        .btn:focus-visible {
+            box-shadow: 0 0 0 3px rgba(255,255,255,0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .btn-lap {
+            flex: 0.7;
+        }
+
+        /* Laps */
+        .laps-container {
+            margin-top: 24px;
+            max-height: 180px;
+            overflow-y: auto;
+            transition: opacity 0.3s ease;
+        }
+
+        .laps-container::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .laps-container::-webkit-scrollbar-thumb {
+            border-radius: 2px;
+        }
+
+        .lap-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 4px;
+            font-size: 13px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .lap-number {
+            font-weight: 600;
+            min-width: 45px;
+            text-align: left;
+        }
+
+        .lap-duration {
+            font-weight: 500;
+        }
+
+        .lap-total {
+            font-size: 11px;
+            opacity: 0.6;
+        }
+
+        .laps-average {
+            padding-top: 10px;
+            margin-top: 6px;
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        /* Running state */
+        .is-running .face-switcher {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .is-running .btn-reset {
+            opacity: 0.4;
+        }
+
+        /* ================================ */
+        /* FACE 1: Classic Chronograph     */
+        /* ================================ */
+        body.face-chronograph {
+            background: #0a1628;
+        }
+
+        .face-chronograph .card {
+            background: linear-gradient(145deg, #0f1f38 0%, #0a1628 100%);
+            border: 1px solid rgba(192,192,210,0.12);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+        }
+
+        .face-chronograph .face-btn {
+            background: rgba(192,192,210,0.08);
+            color: rgba(192,192,210,0.5);
+        }
+
+        .face-chronograph .face-btn:hover {
+            background: rgba(192,192,210,0.12);
+        }
+
+        .face-chronograph .face-btn.active {
+            background: rgba(192,192,210,0.2);
+            color: #e8e8f0;
+        }
+
+        .face-chronograph .time-display {
+            font-size: 84px;
+            font-weight: 400;
+            font-family: 'Times New Roman', Georgia, serif;
+            color: #e8e8f0;
+            letter-spacing: 0.02em;
+        }
+
+        .face-chronograph .time-display.running {
+            text-shadow: 0 0 60px rgba(192,192,210,0.3), 0 0 120px rgba(192,192,210,0.1);
+        }
+
+        .face-chronograph .copied-toast {
+            background: rgba(192,192,210,0.9);
+            color: #0a1628;
+        }
+
+        .face-chronograph .status-dot {
+            background: #c0c0d2;
+        }
+
+        .face-chronograph .btn-start {
+            background: linear-gradient(135deg, #2a4a7a 0%, #1a3a6a 100%);
+            color: #e8e8f0;
+        }
+
+        .face-chronograph .btn-start:hover:not(:disabled) {
+            box-shadow: 0 4px 20px rgba(42,74,122,0.4);
+        }
+
+        .face-chronograph .btn-stop {
+            background: linear-gradient(135deg, #8a3a3a 0%, #6a2a2a 100%);
+            color: #e8e8f0;
+        }
+
+        .face-chronograph .btn-stop:hover:not(:disabled) {
+            box-shadow: 0 4px 20px rgba(138,58,58,0.4);
+        }
+
+        .face-chronograph .btn-reset,
+        .face-chronograph .btn-lap {
+            background: rgba(192,192,210,0.1);
+            color: #c0c0d2;
+        }
+
+        .face-chronograph .btn-reset:hover:not(:disabled),
+        .face-chronograph .btn-lap:hover:not(:disabled) {
+            background: rgba(192,192,210,0.18);
+        }
+
+        .face-chronograph .lap-item {
+            background: rgba(192,192,210,0.05);
+            color: #c0c0d2;
+        }
+
+        .face-chronograph .lap-item.fastest .lap-duration {
+            color: #7a9fca;
+        }
+
+        .face-chronograph .laps-container::-webkit-scrollbar-thumb {
+            background: rgba(192,192,210,0.2);
+        }
+
+        .face-chronograph .laps-average {
+            color: rgba(192,192,210,0.6);
+            border-top: 1px solid rgba(192,192,210,0.1);
+        }
+
+        /* ================================ */
+        /* FACE 2: Sport Performance        */
+        /* ================================ */
+        body.face-sport {
+            background: #121212;
+        }
+
+        .face-sport .card {
+            background: #1a1a1a;
+            border: 2px solid #ff6b2c;
+            box-shadow: 0 0 40px rgba(255,107,44,0.15);
+        }
+
+        .face-sport .face-btn {
+            background: rgba(255,107,44,0.1);
+            color: rgba(255,255,255,0.4);
+        }
+
+        .face-sport .face-btn:hover {
+            background: rgba(255,107,44,0.2);
+        }
+
+        .face-sport .face-btn.active {
+            background: #ff6b2c;
+            color: #fff;
+        }
+
+        .face-sport .time-display {
+            font-size: 96px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.03em;
+        }
+
+        .face-sport .time-display.running {
+            color: #ff6b2c;
+            animation: sportPulse 0.8s ease-in-out infinite;
+        }
+
+        .face-sport .copied-toast {
+            background: #ff6b2c;
+            color: #fff;
+        }
+
+        .face-sport .status-dot {
+            background: #ff6b2c;
+            box-shadow: 0 0 10px #ff6b2c;
+        }
+
+        .face-sport .btn {
+            height: 56px;
+            font-size: 16px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            border-radius: 8px;
+        }
+
+        .face-sport .btn-start {
+            background: #ff6b2c;
+            color: #fff;
+        }
+
+        .face-sport .btn-start:hover:not(:disabled) {
+            background: #ff8a50;
+            box-shadow: 0 0 30px rgba(255,107,44,0.6);
+        }
+
+        .face-sport .btn-stop {
+            background: #ff3b3b;
+            color: #fff;
+        }
+
+        .face-sport .btn-stop:hover:not(:disabled) {
+            box-shadow: 0 0 30px rgba(255,59,59,0.6);
+        }
+
+        .face-sport .btn-reset,
+        .face-sport .btn-lap {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+
+        .face-sport .btn-reset:hover:not(:disabled),
+        .face-sport .btn-lap:hover:not(:disabled) {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .face-sport .lap-item {
+            background: rgba(255,107,44,0.1);
+            color: #fff;
+        }
+
+        .face-sport .lap-item.fastest {
+            background: rgba(255,107,44,0.25);
+            border-left: 3px solid #ff6b2c;
+        }
+
+        .face-sport .lap-item.fastest .lap-duration {
+            color: #ff6b2c;
+        }
+
+        .face-sport .laps-container::-webkit-scrollbar-thumb {
+            background: #ff6b2c;
+        }
+
+        .face-sport .laps-average {
+            color: rgba(255,255,255,0.5);
+            border-top: 1px solid rgba(255,107,44,0.3);
+        }
+
+        /* ================================ */
+        /* FACE 3: Minimal Zen              */
+        /* ================================ */
+        body.face-zen {
+            background: #ffffff;
+        }
+
+        .face-zen .card {
+            background: transparent;
+            border: none;
+            padding: 50px 34px;
+        }
+
+        .face-zen .face-btn {
+            background: rgba(0,0,0,0.04);
+            color: rgba(0,0,0,0.3);
+        }
+
+        .face-zen .face-btn:hover {
+            background: rgba(0,0,0,0.08);
+        }
+
+        .face-zen .face-btn.active {
+            background: rgba(0,0,0,0.08);
+            color: #000;
+        }
+
+        .face-zen .time-display {
+            font-size: 120px;
+            font-weight: 200;
+            color: #1a1a1a;
+            letter-spacing: -0.04em;
+        }
+
+        .face-zen .copied-toast {
+            background: #1a1a1a;
+            color: #fff;
+        }
+
+        .face-zen .status-dot {
+            background: #1a1a1a;
+        }
+
+        .face-zen .btn {
+            height: 44px;
+            font-weight: 400;
+            border-radius: 22px;
+        }
+
+        .face-zen .btn-start {
+            background: #1a1a1a;
+            color: #fff;
+        }
+
+        .face-zen .btn-start:hover:not(:disabled) {
+            background: #000;
+        }
+
+        .face-zen .btn-stop {
+            background: #1a1a1a;
+            color: #fff;
+        }
+
+        .face-zen .btn-reset,
+        .face-zen .btn-lap {
+            background: rgba(0,0,0,0.06);
+            color: #1a1a1a;
+        }
+
+        .face-zen .btn-reset:hover:not(:disabled),
+        .face-zen .btn-lap:hover:not(:disabled) {
+            background: rgba(0,0,0,0.1);
+        }
+
+        .face-zen .lap-item {
+            background: rgba(0,0,0,0.03);
+            color: #1a1a1a;
+        }
+
+        .face-zen .lap-item.fastest .lap-duration {
+            font-weight: 600;
+        }
+
+        .face-zen .laps-container::-webkit-scrollbar-thumb {
+            background: rgba(0,0,0,0.15);
+        }
+
+        .face-zen .laps-average {
+            color: rgba(0,0,0,0.4);
+            border-top: 1px solid rgba(0,0,0,0.06);
+        }
+
+        /* ================================ */
+        /* FACE 4: Night Mode OLED          */
+        /* ================================ */
+        body.face-oled {
+            background: #000000;
+        }
+
+        .face-oled .card {
+            background: #000000;
+            border: 1px solid rgba(0,200,255,0.15);
+        }
+
+        .face-oled .face-btn {
+            background: rgba(0,200,255,0.08);
+            color: rgba(0,200,255,0.4);
+        }
+
+        .face-oled .face-btn:hover {
+            background: rgba(0,200,255,0.15);
+        }
+
+        .face-oled .face-btn.active {
+            background: rgba(0,200,255,0.2);
+            color: #00d4ff;
+        }
+
+        .face-oled .time-display {
+            font-size: 88px;
+            font-weight: 300;
+            color: #00d4ff;
+            text-shadow: 0 0 30px rgba(0,212,255,0.5);
+        }
+
+        .face-oled .time-display.running {
+            text-shadow: 0 0 40px rgba(0,212,255,0.7), 0 0 80px rgba(0,212,255,0.4), 0 0 120px rgba(0,212,255,0.2);
+        }
+
+        .face-oled .copied-toast {
+            background: #00d4ff;
+            color: #000;
+        }
+
+        .face-oled .status-dot {
+            background: #00d4ff;
+            box-shadow: 0 0 12px #00d4ff;
+        }
+
+        .face-oled .btn-start {
+            background: rgba(0,212,255,0.2);
+            color: #00d4ff;
+            border: 1px solid rgba(0,212,255,0.4);
+        }
+
+        .face-oled .btn-start:hover:not(:disabled) {
+            background: rgba(0,212,255,0.3);
+            box-shadow: 0 0 25px rgba(0,212,255,0.4);
+        }
+
+        .face-oled .btn-stop {
+            background: rgba(255,50,50,0.2);
+            color: #ff5050;
+            border: 1px solid rgba(255,50,50,0.4);
+        }
+
+        .face-oled .btn-stop:hover:not(:disabled) {
+            background: rgba(255,50,50,0.3);
+        }
+
+        .face-oled .btn-reset,
+        .face-oled .btn-lap {
+            background: rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .face-oled .btn-reset:hover:not(:disabled),
+        .face-oled .btn-lap:hover:not(:disabled) {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .face-oled .lap-item {
+            background: rgba(0,212,255,0.05);
+            color: rgba(0,212,255,0.8);
+        }
+
+        .face-oled .lap-item.fastest .lap-duration {
+            color: #00ffaa;
+            text-shadow: 0 0 10px rgba(0,255,170,0.5);
+        }
+
+        .face-oled .laps-container::-webkit-scrollbar-thumb {
+            background: rgba(0,212,255,0.3);
+        }
+
+        .face-oled .laps-average {
+            color: rgba(0,212,255,0.5);
+            border-top: 1px solid rgba(0,212,255,0.15);
+        }
+
+        /* ================================ */
+        /* FACE 5: Tactical Field           */
+        /* ================================ */
+        body.face-tactical {
+            background: #1a1f16;
+        }
+
+        .face-tactical .card {
+            background: linear-gradient(180deg, #242b1e 0%, #1a1f16 100%);
+            border: 1px solid rgba(140,160,100,0.2);
+            position: relative;
+        }
+
+        .face-tactical .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                linear-gradient(90deg, rgba(140,160,100,0.03) 1px, transparent 1px),
+                linear-gradient(rgba(140,160,100,0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+            pointer-events: none;
+            border-radius: 18px;
+        }
+
+        .face-tactical .face-btn {
+            background: rgba(140,160,100,0.1);
+            color: rgba(140,160,100,0.5);
+        }
+
+        .face-tactical .face-btn:hover {
+            background: rgba(140,160,100,0.2);
+        }
+
+        .face-tactical .face-btn.active {
+            background: rgba(140,160,100,0.25);
+            color: #b8c896;
+        }
+
+        .face-tactical .time-display {
+            font-size: 80px;
+            font-weight: 500;
+            font-family: 'Courier New', Consolas, monospace;
+            color: #b8c896;
+            letter-spacing: 0.05em;
+        }
+
+        .face-tactical .time-display.running {
+            text-shadow: 0 0 20px rgba(140,160,100,0.4);
+        }
+
+        .face-tactical .copied-toast {
+            background: #8ca064;
+            color: #1a1f16;
+        }
+
+        .face-tactical .status-dot {
+            background: #8ca064;
+        }
+
+        .face-tactical .btn {
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-size: 13px;
+        }
+
+        .face-tactical .btn-start {
+            background: #5a6b3a;
+            color: #d4dfc4;
+        }
+
+        .face-tactical .btn-start:hover:not(:disabled) {
+            background: #6a7b4a;
+        }
+
+        .face-tactical .btn-stop {
+            background: #8a4a3a;
+            color: #d4dfc4;
+        }
+
+        .face-tactical .btn-stop:hover:not(:disabled) {
+            background: #9a5a4a;
+        }
+
+        .face-tactical .btn-reset,
+        .face-tactical .btn-lap {
+            background: rgba(140,160,100,0.15);
+            color: #8ca064;
+        }
+
+        .face-tactical .btn-reset:hover:not(:disabled),
+        .face-tactical .btn-lap:hover:not(:disabled) {
+            background: rgba(140,160,100,0.25);
+        }
+
+        .face-tactical .lap-item {
+            background: rgba(140,160,100,0.08);
+            color: #b8c896;
+            font-family: 'Courier New', monospace;
+        }
+
+        .face-tactical .lap-item.fastest .lap-duration {
+            color: #c8d8a6;
+        }
+
+        .face-tactical .laps-container::-webkit-scrollbar-thumb {
+            background: rgba(140,160,100,0.3);
+        }
+
+        .face-tactical .laps-average {
+            color: rgba(140,160,100,0.6);
+            border-top: 1px solid rgba(140,160,100,0.15);
+            font-family: 'Courier New', monospace;
+        }
+
+        /* ================================ */
+        /* FACE 6: Racing Dash              */
+        /* ================================ */
+        body.face-racing {
+            background: #0d0d0d;
+        }
+
+        .face-racing .card {
+            background: 
+                linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
+            border: 1px solid rgba(255,30,30,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .face-racing .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                repeating-linear-gradient(
+                    45deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(255,255,255,0.02) 2px,
+                    rgba(255,255,255,0.02) 4px
+                );
+            pointer-events: none;
+        }
+
+        .face-racing .face-btn {
+            background: rgba(255,30,30,0.1);
+            color: rgba(255,255,255,0.4);
+        }
+
+        .face-racing .face-btn:hover {
+            background: rgba(255,30,30,0.2);
+        }
+
+        .face-racing .face-btn.active {
+            background: #e81e1e;
+            color: #fff;
+        }
+
+        .face-racing .time-display {
+            font-size: 92px;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -0.02em;
+            transform: perspective(500px) rotateX(5deg);
+        }
+
+        .face-racing .time-display.running {
+            color: #ff3030;
+            text-shadow: 0 4px 30px rgba(255,30,30,0.5);
+        }
+
+        .face-racing .copied-toast {
+            background: #e81e1e;
+            color: #fff;
+        }
+
+        .face-racing .status-dot {
+            background: #e81e1e;
+            box-shadow: 0 0 10px #e81e1e;
+        }
+
+        .face-racing .btn {
+            border-radius: 6px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .face-racing .btn-start {
+            background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%);
+            color: #00ff00;
+            border: 1px solid #00aa00;
+        }
+
+        .face-racing .btn-start:hover:not(:disabled) {
+            box-shadow: 0 0 20px rgba(0,255,0,0.3);
+        }
+
+        .face-racing .btn-stop {
+            background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%);
+            color: #ff3030;
+            border: 1px solid #cc0000;
+        }
+
+        .face-racing .btn-stop:hover:not(:disabled) {
+            box-shadow: 0 0 20px rgba(255,30,30,0.3);
+        }
+
+        .face-racing .btn-reset,
+        .face-racing .btn-lap {
+            background: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.7);
+        }
+
+        .face-racing .btn-reset:hover:not(:disabled),
+        .face-racing .btn-lap:hover:not(:disabled) {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .face-racing .lap-item {
+            background: rgba(255,30,30,0.08);
+            color: #fff;
+        }
+
+        .face-racing .lap-item.fastest {
+            border-left: 3px solid #00ff00;
+        }
+
+        .face-racing .lap-item.fastest .lap-duration {
+            color: #00ff00;
+        }
+
+        .face-racing .laps-container::-webkit-scrollbar-thumb {
+            background: #e81e1e;
+        }
+
+        .face-racing .laps-average {
+            color: rgba(255,255,255,0.5);
+            border-top: 1px solid rgba(255,30,30,0.2);
+        }
+
+        /* ================================ */
+        /* FACE 7: Retro Digital            */
+        /* ================================ */
+        body.face-retro {
+            background: #2a2a28;
+        }
+
+        .face-retro .card {
+            background: linear-gradient(180deg, #3a3a36 0%, #2a2a28 100%);
+            border: 3px solid #1a1a18;
+            border-radius: 8px;
+            box-shadow: inset 0 2px 0 rgba(255,255,255,0.05), 0 4px 0 #1a1a18;
+        }
+
+        .face-retro .face-btn {
+            background: rgba(200,180,120,0.1);
+            color: rgba(200,180,120,0.4);
+            border-radius: 4px;
+        }
+
+        .face-retro .face-btn:hover {
+            background: rgba(200,180,120,0.2);
+        }
+
+        .face-retro .face-btn.active {
+            background: rgba(200,180,120,0.25);
+            color: #c8b478;
+        }
+
+        .face-retro .time-display {
+            font-size: 76px;
+            font-weight: 400;
+            font-family: 'Courier New', Consolas, monospace;
+            color: #c8b478;
+            text-shadow: 0 0 15px rgba(200,180,120,0.5);
+            background: rgba(0,0,0,0.3);
+            border-radius: 4px;
+            padding: 16px 24px;
+            display: inline-block;
+        }
+
+        .face-retro .time-display.running {
+            text-shadow: 0 0 20px rgba(200,180,120,0.7), 0 0 40px rgba(200,180,120,0.3);
+        }
+
+        .face-retro .copied-toast {
+            background: #c8b478;
+            color: #2a2a28;
+        }
+
+        .face-retro .status-dot {
+            background: #c8b478;
+        }
+
+        .face-retro .btn {
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            box-shadow: 0 3px 0 rgba(0,0,0,0.3);
+        }
+
+        .face-retro .btn:active:not(:disabled) {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 rgba(0,0,0,0.3);
+        }
+
+        .face-retro .btn-start {
+            background: #4a5a3a;
+            color: #b8c896;
+        }
+
+        .face-retro .btn-stop {
+            background: #6a4a4a;
+            color: #d4b4b4;
+        }
+
+        .face-retro .btn-reset,
+        .face-retro .btn-lap {
+            background: #4a4a48;
+            color: #a0a098;
+        }
+
+        .face-retro .lap-item {
+            background: rgba(0,0,0,0.2);
+            color: #c8b478;
+            font-family: 'Courier New', monospace;
+            border-radius: 4px;
+        }
+
+        .face-retro .lap-item.fastest .lap-duration {
+            color: #98d878;
+        }
+
+        .face-retro .laps-container::-webkit-scrollbar-thumb {
+            background: rgba(200,180,120,0.3);
+        }
+
+        .face-retro .laps-average {
+            color: rgba(200,180,120,0.6);
+            border-top: 1px solid rgba(200,180,120,0.15);
+            font-family: 'Courier New', monospace;
+        }
+
+        /* ================================ */
+        /* FACE 8: Luxury Gold              */
+        /* ================================ */
+        body.face-gold {
+            background: #1a1812;
+        }
+
+        .face-gold .card {
+            background: linear-gradient(145deg, #242018 0%, #1a1812 100%);
+            border: 1px solid rgba(212,175,85,0.2);
+            box-shadow: inset 0 1px 0 rgba(212,175,85,0.1);
+        }
+
+        .face-gold .face-btn {
+            background: rgba(212,175,85,0.08);
+            color: rgba(212,175,85,0.4);
+        }
+
+        .face-gold .face-btn:hover {
+            background: rgba(212,175,85,0.15);
+        }
+
+        .face-gold .face-btn.active {
+            background: linear-gradient(135deg, rgba(212,175,85,0.3) 0%, rgba(180,140,60,0.3) 100%);
+            color: #d4af55;
+        }
+
+        .face-gold .time-display {
+            font-size: 86px;
+            font-weight: 400;
+            font-family: 'Times New Roman', Georgia, serif;
+            background: linear-gradient(180deg, #f0d890 0%, #d4af55 50%, #a08030 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .face-gold .time-display.running {
+            filter: drop-shadow(0 0 20px rgba(212,175,85,0.4));
+        }
+
+        .face-gold .copied-toast {
+            background: linear-gradient(135deg, #d4af55 0%, #a08030 100%);
+            color: #1a1812;
+        }
+
+        .face-gold .status-dot {
+            background: linear-gradient(135deg, #f0d890 0%, #d4af55 100%);
+        }
+
+        .face-gold .btn {
+            border-radius: 8px;
+        }
+
+        .face-gold .btn-start {
+            background: linear-gradient(135deg, #3a3428 0%, #2a2418 100%);
+            color: #d4af55;
+            border: 1px solid rgba(212,175,85,0.3);
+        }
+
+        .face-gold .btn-start:hover:not(:disabled) {
+            border-color: rgba(212,175,85,0.5);
+            box-shadow: 0 4px 20px rgba(212,175,85,0.2);
+        }
+
+        .face-gold .btn-stop {
+            background: linear-gradient(135deg, #4a2828 0%, #3a1818 100%);
+            color: #d4a0a0;
+            border: 1px solid rgba(180,100,100,0.3);
+        }
+
+        .face-gold .btn-reset,
+        .face-gold .btn-lap {
+            background: rgba(212,175,85,0.08);
+            color: rgba(212,175,85,0.7);
+            border: 1px solid rgba(212,175,85,0.15);
+        }
+
+        .face-gold .btn-reset:hover:not(:disabled),
+        .face-gold .btn-lap:hover:not(:disabled) {
+            background: rgba(212,175,85,0.15);
+        }
+
+        .face-gold .lap-item {
+            background: rgba(212,175,85,0.05);
+            color: #c4a050;
+        }
+
+        .face-gold .lap-item.fastest .lap-duration {
+            color: #f0d890;
+        }
+
+        .face-gold .laps-container::-webkit-scrollbar-thumb {
+            background: rgba(212,175,85,0.3);
+        }
+
+        .face-gold .laps-average {
+            color: rgba(212,175,85,0.5);
+            border-top: 1px solid rgba(212,175,85,0.1);
+        }
+
+        /* ================================ */
+        /* FACE 9: Focus Mode               */
+        /* ================================ */
+        body.face-focus {
+            background: #e8ecf0;
+        }
+
+        .face-focus .card {
+            background: #f4f6f8;
+            border: 1px solid rgba(100,120,150,0.12);
+            box-shadow: 0 2px 20px rgba(100,120,150,0.08);
+        }
+
+        .face-focus .face-btn {
+            background: rgba(100,120,150,0.08);
+            color: rgba(100,120,150,0.5);
+        }
+
+        .face-focus .face-btn:hover {
+            background: rgba(100,120,150,0.12);
+        }
+
+        .face-focus .face-btn.active {
+            background: rgba(100,120,150,0.15);
+            color: #4a5a6a;
+        }
+
+        .face-focus .time-display {
+            font-size: 94px;
+            font-weight: 300;
+            color: #3a4a5a;
+        }
+
+        .face-focus .copied-toast {
+            background: #4a5a6a;
+            color: #fff;
+        }
+
+        .face-focus .status-dot {
+            background: #6a8aaa;
+        }
+
+        .face-focus .buttons {
+            opacity: 0.7;
+        }
+
+        .face-focus .buttons:hover {
+            opacity: 1;
+        }
+
+        .face-focus .btn {
+            height: 42px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .face-focus .btn-start {
+            background: #5a7a9a;
+            color: #fff;
+        }
+
+        .face-focus .btn-start:hover:not(:disabled) {
+            background: #4a6a8a;
+        }
+
+        .face-focus .btn-stop {
+            background: #9a7a7a;
+            color: #fff;
+        }
+
+        .face-focus .btn-reset,
+        .face-focus .btn-lap {
+            background: rgba(100,120,150,0.1);
+            color: #5a6a7a;
+        }
+
+        .face-focus .btn-reset:hover:not(:disabled),
+        .face-focus .btn-lap:hover:not(:disabled) {
+            background: rgba(100,120,150,0.18);
+        }
+
+        .face-focus .lap-item {
+            background: rgba(100,120,150,0.06);
+            color: #4a5a6a;
+        }
+
+        .face-focus .lap-item.fastest .lap-duration {
+            color: #3a6a8a;
+            font-weight: 600;
+        }
+
+        .face-focus .laps-container::-webkit-scrollbar-thumb {
+            background: rgba(100,120,150,0.25);
+        }
+
+        .face-focus .laps-average {
+            color: rgba(100,120,150,0.6);
+            border-top: 1px solid rgba(100,120,150,0.1);
+        }
+
+        /* ================================ */
+        /* FACE 10: Playful Pop             */
+        /* ================================ */
+        body.face-pop {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .face-pop .card {
+            background: #ffffff;
+            border: none;
+            border-radius: 28px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+
+        .face-pop .face-btn {
+            background: rgba(102,126,234,0.1);
+            color: rgba(102,126,234,0.6);
+            border-radius: 20px;
+        }
+
+        .face-pop .face-btn:hover {
+            background: rgba(102,126,234,0.2);
+        }
+
+        .face-pop .face-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+
+        .face-pop .time-display {
+            font-size: 88px;
+            font-weight: 700;
+            color: #764ba2;
+        }
+
+        .face-pop .time-display.running {
+            animation: bounce 0.6s ease-in-out;
+        }
+
+        .face-pop .copied-toast {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            border-radius: 20px;
+        }
+
+        .face-pop .status-dot {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .face-pop .btn {
+            border-radius: 16px;
+            font-weight: 700;
+        }
+
+        .face-pop .btn-start {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+
+        .face-pop .btn-start:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102,126,234,0.4);
+        }
+
+        .face-pop .btn-stop {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: #fff;
+        }
+
+        .face-pop .btn-stop:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(245,87,108,0.4);
+        }
+
+        .face-pop .btn-reset,
+        .face-pop .btn-lap {
+            background: rgba(102,126,234,0.1);
+            color: #667eea;
+        }
+
+        .face-pop .btn-reset:hover:not(:disabled),
+        .face-pop .btn-lap:hover:not(:disabled) {
+            background: rgba(102,126,234,0.2);
+        }
+
+        .face-pop .lap-item {
+            background: linear-gradient(135deg, rgba(102,126,234,0.08) 0%, rgba(118,75,162,0.08) 100%);
+            color: #4a4a6a;
+            border-radius: 12px;
+        }
+
+        .face-pop .lap-item.fastest .lap-duration {
+            color: #667eea;
+        }
+
+        .face-pop .laps-container::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px;
+        }
+
+        .face-pop .laps-average {
+            color: rgba(102,126,234,0.7);
+            border-top: 1px solid rgba(102,126,234,0.15);
+        }
+
+        /* ================================ */
+        /* FACE 11: Scientific Precision    */
+        /* ================================ */
+        body.face-scientific {
+            background: #f0f2f5;
+        }
+
+        .face-scientific .card {
+            background: #ffffff;
+            border: 1px solid #d0d4da;
+            position: relative;
+        }
+
+        .face-scientific .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                linear-gradient(90deg, rgba(180,190,200,0.08) 1px, transparent 1px),
+                linear-gradient(rgba(180,190,200,0.08) 1px, transparent 1px);
+            background-size: 16px 16px;
+            pointer-events: none;
+            border-radius: 18px;
+        }
+
+        .face-scientific .face-btn {
+            background: rgba(60,80,100,0.06);
+            color: rgba(60,80,100,0.5);
+            font-family: 'Courier New', monospace;
+            font-size: 9px;
+        }
+
+        .face-scientific .face-btn:hover {
+            background: rgba(60,80,100,0.1);
+        }
+
+        .face-scientific .face-btn.active {
+            background: rgba(60,80,100,0.12);
+            color: #2a3a4a;
+        }
+
+        .face-scientific .time-display {
+            font-size: 72px;
+            font-weight: 400;
+            font-family: 'Courier New', Consolas, monospace;
+            color: #1a2a3a;
+            letter-spacing: 0.03em;
+        }
+
+        .face-scientific .copied-toast {
+            background: #3a4a5a;
+            color: #fff;
+        }
+
+        .face-scientific .status-dot {
+            background: #4a7a4a;
+        }
+
+        .face-scientific .btn {
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .face-scientific .btn-start {
+            background: #4a7a4a;
+            color: #fff;
+        }
+
+        .face-scientific .btn-stop {
+            background: #7a4a4a;
+            color: #fff;
+        }
+
+        .face-scientific .btn-reset,
+        .face-scientific .btn-lap {
+            background: rgba(60,80,100,0.08);
+            color: #4a5a6a;
+        }
+
+        .face-scientific .btn-reset:hover:not(:disabled),
+        .face-scientific .btn-lap:hover:not(:disabled) {
+            background: rgba(60,80,100,0.15);
+        }
+
+        .face-scientific .lap-item {
+            background: rgba(60,80,100,0.04);
+            color: #2a3a4a;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .face-scientific .lap-item.fastest .lap-duration {
+            color: #2a6a2a;
+            font-weight: 700;
+        }
+
+        .face-scientific .laps-container::-webkit-scrollbar-thumb {
+            background: rgba(60,80,100,0.25);
+        }
+
+        .face-scientific .laps-average {
+            color: rgba(60,80,100,0.6);
+            border-top: 1px solid rgba(60,80,100,0.1);
+            font-family: 'Courier New', monospace;
+        }
+
+        /* ================================ */
+        /* FACE 12: Stealth Mono            */
+        /* ================================ */
+        body.face-stealth {
+            background: #282828;
+        }
+
+        .face-stealth .card {
+            background: #282828;
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+
+        .face-stealth .face-switcher {
+            opacity: 0.2;
+            transition: opacity 0.3s ease;
+        }
+
+        .face-stealth .face-switcher:hover {
+            opacity: 0.6;
+        }
+
+        .face-stealth .face-btn {
+            background: rgba(255,255,255,0.03);
+            color: rgba(255,255,255,0.2);
+        }
+
+        .face-stealth .face-btn:hover {
+            background: rgba(255,255,255,0.06);
+        }
+
+        .face-stealth .face-btn.active {
+            background: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.4);
+        }
+
+        .face-stealth .time-display {
+            font-size: 88px;
+            font-weight: 300;
+            color: rgba(255,255,255,0.15);
+            transition: color 0.5s ease, text-shadow 0.5s ease;
+        }
+
+        .face-stealth .time-display.running {
+            color: rgba(255,255,255,0.5);
+        }
+
+        .face-stealth .copied-toast {
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+        }
+
+        .face-stealth .status-dot {
+            background: rgba(255,255,255,0.4);
+        }
+
+        .face-stealth .buttons {
+            opacity: 0.15;
+            transition: opacity 0.3s ease;
+        }
+
+        .face-stealth .buttons:hover,
+        .face-stealth.controls-active .buttons {
+            opacity: 0.5;
+        }
+
+        .face-stealth .btn {
+            border-radius: 8px;
+        }
+
+        .face-stealth .btn-start {
+            background: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.5);
+        }
+
+        .face-stealth .btn-start:hover:not(:disabled) {
+            background: rgba(255,255,255,0.12);
+        }
+
+        .face-stealth .btn-stop {
+            background: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.5);
+        }
+
+        .face-stealth .btn-reset,
+        .face-stealth .btn-lap {
+            background: rgba(255,255,255,0.04);
+            color: rgba(255,255,255,0.3);
+        }
+
+        .face-stealth .btn-reset:hover:not(:disabled),
+        .face-stealth .btn-lap:hover:not(:disabled) {
+            background: rgba(255,255,255,0.08);
+        }
+
+        .face-stealth .laps-container {
+            opacity: 0.3;
+        }
+
+        .face-stealth .laps-container:hover {
+            opacity: 0.6;
+        }
+
+        .face-stealth .lap-item {
+            background: rgba(255,255,255,0.03);
+            color: rgba(255,255,255,0.4);
+        }
+
+        .face-stealth .lap-item.fastest .lap-duration {
+            color: rgba(255,255,255,0.6);
+        }
+
+        .face-stealth .laps-container::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .face-stealth .laps-average {
+            color: rgba(255,255,255,0.25);
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* Mobile */
+        @media (max-width: 600px) {
+            .card {
+                padding: 24px 20px;
+            }
+
+            .face-switcher {
+                gap: 4px;
+            }
+
+            .face-btn {
+                padding: 5px 8px;
+                font-size: 9px;
+            }
+
+            .time-display {
+                font-size: 56px !important;
+            }
+
+            .face-zen .time-display {
+                font-size: 68px !important;
+            }
+
+            .buttons {
+                flex-wrap: wrap;
+            }
+
+            .btn-start {
+                width: 100%;
+                flex: none;
+                order: -1;
+            }
+
+            .btn-lap {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body class="face-chronograph">
+    <div class="card">
+        <div class="face-switcher">
+            <button class="face-btn active" data-face="chronograph">Classic</button>
+            <button class="face-btn" data-face="sport">Sport</button>
+            <button class="face-btn" data-face="zen">Zen</button>
+            <button class="face-btn" data-face="oled">OLED</button>
+            <button class="face-btn" data-face="tactical">Tactical</button>
+            <button class="face-btn" data-face="racing">Racing</button>
+            <button class="face-btn" data-face="retro">Retro</button>
+            <button class="face-btn" data-face="gold">Gold</button>
+            <button class="face-btn" data-face="focus">Focus</button>
+            <button class="face-btn" data-face="pop">Pop</button>
+            <button class="face-btn" data-face="scientific">Scientific</button>
+            <button class="face-btn" data-face="stealth">Stealth</button>
+        </div>
+
+        <div class="time-container">
+            <div class="time-display" id="timeDisplay" title="Click to copy">00:00.00</div>
+            <div class="copied-toast" id="copiedToast">Copied</div>
+        </div>
+
+        <div class="status">
+            <div class="status-dot" id="statusDot"></div>
+        </div>
+
+        <div class="buttons">
+            <button class="btn btn-start" id="startBtn">Start</button>
+            <button class="btn btn-lap" id="lapBtn" style="display: none;">Lap</button>
+            <button class="btn btn-stop" id="stopBtn" disabled>Stop</button>
+            <button class="btn btn-reset" id="resetBtn">Reset</button>
+        </div>
+
+        <div class="laps-container" id="lapsContainer" style="display: none;"></div>
+    </div>
+
+    <script>
+        const timeDisplay = document.getElementById('timeDisplay');
+        const copiedToast = document.getElementById('copiedToast');
+        const statusDot = document.getElementById('statusDot');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const lapBtn = document.getElementById('lapBtn');
+        const lapsContainer = document.getElementById('lapsContainer');
+        const faceBtns = document.querySelectorAll('.face-btn');
+
+        let isRunning = false;
+        let startTime = 0;
+        let elapsedTime = 0;
+        let animationId = null;
+        let copyTimeoutId = null;
+        let laps = [];
+        let lastLapTime = 0;
+
+        function init() {
+            const savedFace = localStorage.getItem('stopwatch-face') || 'chronograph';
+            setFace(savedFace);
+        }
+
+        function setFace(face) {
+            document.body.className = `face-${face}`;
+            if (isRunning) {
+                document.body.classList.add('is-running');
+                timeDisplay.classList.add('running');
+                statusDot.classList.add('running');
+            }
+            
+            faceBtns.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.face === face);
+            });
+            
+            localStorage.setItem('stopwatch-face', face);
+        }
+
+        function formatTime(ms) {
+            const totalSeconds = Math.floor(ms / 1000);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            const hundredths = Math.floor((ms % 1000) / 10);
+            
+            return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(hundredths).padStart(2, '0')}`;
+        }
+
+        function getCurrentTime() {
+            return isRunning ? elapsedTime + (Date.now() - startTime) : elapsedTime;
+        }
+
+        function updateDisplay() {
+            timeDisplay.textContent = formatTime(getCurrentTime());
+            
+            if (isRunning) {
+                animationId = requestAnimationFrame(updateDisplay);
+            }
+        }
+
+        function start() {
+            if (isRunning) return;
+            
+            isRunning = true;
+            startTime = Date.now();
+            
+            document.body.classList.add('is-running');
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            lapBtn.style.display = '';
+            
+            timeDisplay.classList.add('running');
+            statusDot.classList.add('running');
+            
+            updateDisplay();
+        }
+
+        function stop() {
+            if (!isRunning) return;
+            
+            isRunning = false;
+            elapsedTime += Date.now() - startTime;
+            
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+            
+            document.body.classList.remove('is-running');
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            lapBtn.style.display = 'none';
+            
+            timeDisplay.classList.remove('running');
+            statusDot.classList.remove('running');
+        }
+
+        function reset() {
+            isRunning = false;
+            elapsedTime = 0;
+            startTime = 0;
+            laps = [];
+            lastLapTime = 0;
+            
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+            
+            timeDisplay.textContent = '00:00.00';
+            
+            document.body.classList.remove('is-running');
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            lapBtn.style.display = 'none';
+            lapsContainer.style.display = 'none';
+            lapsContainer.innerHTML = '';
+            
+            timeDisplay.classList.remove('running');
+            statusDot.classList.remove('running');
+        }
+
+        function addLap() {
+            if (!isRunning) return;
+            
+            const currentTotal = getCurrentTime();
+            const lapDuration = currentTotal - lastLapTime;
+            lastLapTime = currentTotal;
+            
+            laps.push({
+                number: laps.length + 1,
+                duration: lapDuration,
+                total: currentTotal
+            });
+            
+            renderLaps();
+        }
+
+        function renderLaps() {
+            if (laps.length === 0) {
+                lapsContainer.style.display = 'none';
+                return;
+            }
+            
+            lapsContainer.style.display = '';
+            
+            const fastestIndex = laps.reduce((minIdx, lap, idx, arr) => 
+                lap.duration < arr[minIdx].duration ? idx : minIdx, 0);
+            
+            const avgDuration = laps.reduce((sum, lap) => sum + lap.duration, 0) / laps.length;
+            
+            let html = '';
+            
+            [...laps].reverse().forEach((lap, revIdx) => {
+                const actualIdx = laps.length - 1 - revIdx;
+                const isFastest = actualIdx === fastestIndex && laps.length > 1;
+                
+                html += `
+                    <div class="lap-item ${isFastest ? 'fastest' : ''}">
+                        <span class="lap-number">Lap ${lap.number}</span>
+                        <span class="lap-duration">${formatTime(lap.duration)}</span>
+                        <span class="lap-total">${formatTime(lap.total)}</span>
+                    </div>
+                `;
+            });
+            
+            if (laps.length > 1) {
+                html += `<div class="laps-average">Average: ${formatTime(avgDuration)}</div>`;
+            }
+            
+            lapsContainer.innerHTML = html;
+        }
+
+        function copyTime() {
+            const timeString = formatTime(getCurrentTime());
+            
+            navigator.clipboard.writeText(timeString).then(() => {
+                showCopiedToast();
+            }).catch(() => {
+                const textArea = document.createElement('textarea');
+                textArea.value = timeString;
+                textArea.style.position = 'fixed';
+                textArea.style.opacity = '0';
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showCopiedToast();
+            });
+        }
+
+        function showCopiedToast() {
+            if (copyTimeoutId) clearTimeout(copyTimeoutId);
+            copiedToast.classList.add('show');
+            copyTimeoutId = setTimeout(() => {
+                copiedToast.classList.remove('show');
+                copyTimeoutId = null;
+            }, 1000);
+        }
+
+        // Event listeners
+        startBtn.addEventListener('click', start);
+        stopBtn.addEventListener('click', stop);
+        resetBtn.addEventListener('click', reset);
+        lapBtn.addEventListener('click', addLap);
+        timeDisplay.addEventListener('click', copyTime);
+
+        faceBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                setFace(btn.dataset.face);
+            });
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (isRunning) {
+                    stop();
+                } else {
+                    start();
+                }
+            } else if (e.code === 'KeyR' && !e.metaKey && !e.ctrlKey) {
+                reset();
+            } else if (e.code === 'KeyL' && isRunning) {
+                addLap();
+            }
+        });
+
+        // Controls visibility for stealth and similar faces
+        let controlsTimeout;
+        document.addEventListener('mousemove', () => {
+            const isStealth = document.body.classList.contains('face-stealth');
+            const isZen = document.body.classList.contains('face-zen');
+            
+            if (isStealth || isZen) {
+                document.body.classList.add('controls-active');
+                clearTimeout(controlsTimeout);
+                controlsTimeout = setTimeout(() => {
+                    document.body.classList.remove('controls-active');
+                }, 2000);
+            }
+        });
+
+        init();
+    </script>
+</body>
+</html>
