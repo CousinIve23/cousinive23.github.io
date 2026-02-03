@@ -1,450 +1,255 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CousinIve - Simple Software Tools for Work</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Southpaw IQ – Smarter Boxing Training</title>
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            line-height: 1.6;
-            color: #1F2933;
-            background: #F7F8FA;
-        }
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+        Ubuntu, Cantarell, sans-serif;
+      line-height: 1.6;
+      color: #111827;
+      background: #0b0f19;
+    }
 
-        header {
-            padding: 20px 0;
-            background: #fff;
-            border-bottom: 1px solid rgba(0,0,0,0.06);
-        }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
 
-        .logo {
-            font-size: 24px;
-            font-weight: 700;
-            color: #1F2933;
-        }
+    header {
+      padding: 24px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
 
-        .hero {
-            background: #fff;
-            padding: 80px 0 60px;
-            text-align: center;
-        }
+    .logo {
+      font-size: 22px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+    }
 
-        .hero h1 {
-            font-size: 48px;
-            font-weight: 700;
-            margin-bottom: 16px;
-            line-height: 1.2;
-        }
+    .hero {
+      padding: 100px 20px;
+      text-align: center;
+    }
 
-        .hero p {
-            font-size: 20px;
-            color: #6B7280;
-            margin-bottom: 32px;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-        }
+    .hero h1 {
+      font-size: 52px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 20px;
+      line-height: 1.1;
+    }
 
-        .cta-group {
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-bottom: 16px;
-        }
+    .hero p {
+      font-size: 20px;
+      color: #9ca3af;
+      max-width: 800px;
+      margin: 0 auto 40px;
+    }
 
-        .btn {
-            padding: 14px 32px;
-            font-size: 16px;
-            font-weight: 600;
-            text-decoration: none;
-            border-radius: 8px;
-            cursor: pointer;
-            border: none;
-            display: inline-block;
-            transition: all 0.2s;
-        }
+    .cta-group {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
 
-        .btn-primary {
-            background: #2C4FD8;
-            color: #fff;
-        }
+    .btn {
+      padding: 16px 36px;
+      font-size: 16px;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-block;
+    }
 
-        .btn-primary:hover {
-            background: #1E3FBF;
-        }
+    .btn-primary {
+      background: #facc15;
+      color: #000000;
+    }
 
-        .hero-note {
-            font-size: 14px;
-            color: #6B7280;
-        }
+    .btn-primary:hover {
+      background: #eab308;
+    }
 
-        .section {
-            padding: 60px 0;
-        }
+    .btn-secondary {
+      background: transparent;
+      color: #ffffff;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
 
-        .section-title {
-            text-align: center;
-            font-size: 36px;
-            font-weight: 700;
-            margin-bottom: 48px;
-        }
+    .btn-secondary:hover {
+      border-color: rgba(255,255,255,0.5);
+    }
 
-        .how-it-works {
-            background: #fff;
-            border-top: 1px solid rgba(0,0,0,0.06);
-            border-bottom: 1px solid rgba(0,0,0,0.06);
-            padding: 60px 0;
-        }
+    .section {
+      padding: 80px 0;
+    }
 
-        .steps {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 40px;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
+    .section-title {
+      text-align: center;
+      font-size: 36px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 60px;
+    }
 
-        .step {
-            text-align: center;
-        }
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 40px;
+    }
 
-        .step-icon {
-            width: 56px;
-            height: 56px;
-            background: #F0F4FF;
-            color: #2C4FD8;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: 700;
-            margin: 0 auto 20px;
-        }
+    .feature {
+      background: #111827;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 32px;
+    }
 
-        .step h3 {
-            font-size: 20px;
-            margin-bottom: 12px;
-            color: #1F2933;
-        }
+    .feature h3 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 12px;
+    }
 
-        .step p {
-            color: #6B7280;
-            font-size: 16px;
-            line-height: 1.6;
-        }
+    .feature p {
+      font-size: 16px;
+      color: #9ca3af;
+      line-height: 1.6;
+    }
 
-        .apps-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 24px;
-        }
+    .closing {
+      background: #020617;
+      padding: 80px 20px;
+      text-align: center;
+    }
 
-        .app-card {
-            background: #fff;
-            border: 1px solid rgba(0,0,0,0.06);
-            border-radius: 12px;
-            padding: 32px;
-            transition: all 0.2s;
-        }
+    .closing p {
+      font-size: 18px;
+      color: #9ca3af;
+      max-width: 800px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
 
-        .app-card:hover {
-            border-color: rgba(0,0,0,0.12);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
-        }
+    footer {
+      padding: 40px 20px;
+      text-align: center;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
 
-        .app-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 12px;
-        }
+    footer p {
+      font-size: 14px;
+      color: #6b7280;
+    }
 
-        .app-name {
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 38px;
+      }
 
-        .app-tag {
-            padding: 4px 12px;
-            font-size: 12px;
-            font-weight: 600;
-            border-radius: 4px;
-            text-transform: uppercase;
-        }
-
-        .tag-free {
-            background: #F0F4FF;
-            color: #2C4FD8;
-        }
-
-        .tag-paid {
-            background: #F0F4FF;
-            color: #8FA2E8;
-        }
-
-        .tag-new {
-            background: #FFF9E6;
-            color: #C79D3A;
-        }
-
-        .app-description {
-            color: #6B7280;
-            margin-bottom: 16px;
-            font-size: 15px;
-            line-height: 1.6;
-        }
-
-        .app-price {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 20px;
-        }
-
-        .app-cta {
-            width: 100%;
-        }
-
-        .recommended {
-            border: 2px solid #2C4FD8;
-            position: relative;
-        }
-
-        .recommended::before {
-            content: "START HERE";
-            position: absolute;
-            top: -12px;
-            left: 24px;
-            background: #2C4FD8;
-            color: #fff;
-            padding: 4px 12px;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-
-        .closing {
-            padding: 50px 0;
-            text-align: center;
-            background: #fff;
-            border-top: 1px solid rgba(0,0,0,0.06);
-        }
-
-        .closing p {
-            font-size: 17px;
-            color: #6B7280;
-            max-width: 800px;
-            margin: 0 auto;
-            line-height: 1.7;
-        }
-
-        footer {
-            padding: 50px 0;
-            text-align: center;
-            background: #F7F8FA;
-        }
-
-        .footer-logo {
-            font-size: 20px;
-            font-weight: 700;
-            color: #1F2933;
-            margin-bottom: 20px;
-        }
-
-        .footer-contact {
-            font-size: 14px;
-            color: #6B7280;
-        }
-
-        .footer-contact p {
-            margin: 6px 0;
-        }
-
-        @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 36px;
-            }
-
-            .hero p {
-                font-size: 18px;
-            }
-
-            .section-title {
-                font-size: 28px;
-            }
-
-            .apps-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .steps {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+      .hero p {
+        font-size: 18px;
+      }
+    }
+  </style>
 </head>
+
 <body>
-    <header>
-        <div class="container">
-            <div class="logo">CousinIve</div>
+
+  <header>
+    <div class="container">
+      <div class="logo">Southpaw IQ</div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <h1>Train Smarter as a Southpaw</h1>
+      <p>
+        Southpaw IQ is a focused boxing training app built specifically for
+        left-handed fighters. Improve awareness, strategy, and decision-making
+        through guided drills and structured training tools.
+      </p>
+
+      <div class="cta-group">
+        <a href="#" class="btn btn-primary">Download on the App Store</a>
+        <a href="#" class="btn btn-secondary">View App Preview</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h2 class="section-title">Why Southpaw IQ</h2>
+
+      <div class="features">
+        <div class="feature">
+          <h3>Southpaw-First Design</h3>
+          <p>
+            Built specifically for left-handed boxers. No mirrored orthodox shortcuts.
+            Every drill respects southpaw angles, timing, and positioning.
+          </p>
         </div>
-    </header>
 
-    <section class="hero">
-        <div class="container">
-            <h1>Simple Software Tools for Everyday Work</h1>
-            <p>Task management, time tracking, invoicing, and productivity tools. Some run in your browser. Others are lightweight downloads. No accounts required for basic tools.</p>
-            <div class="cta-group">
-                <a href="#focus-timer" class="btn btn-primary">Start Here</a>
-            </div>
-            <p class="hero-note">For individuals and small teams</p>
+        <div class="feature">
+          <h3>Structured Training Tools</h3>
+          <p>
+            Clear, repeatable training frameworks designed to improve focus,
+            tactical awareness, and ring IQ.
+          </p>
         </div>
-    </section>
 
-    <section class="how-it-works">
-        <div class="container">
-            <h2 class="section-title">How It Works</h2>
-            <div class="steps">
-                <div class="step">
-                    <div class="step-icon">→</div>
-                    <h3>Choose a Tool</h3>
-                    <p>Select the software tool designed to solve your specific task.</p>
-                </div>
-                <div class="step">
-                    <div class="step-icon">✓</div>
-                    <h3>Start Immediately</h3>
-                    <p>Open the tool in your browser or install the app if required. No setup. No friction.</p>
-                </div>
-                <div class="step">
-                    <div class="step-icon">⚡</div>
-                    <h3>Get Results</h3>
-                    <p>Save time, reduce manual effort, and stay focused on what matters.</p>
-                </div>
-            </div>
+        <div class="feature">
+          <h3>Simple and Focused</h3>
+          <p>
+            No social feeds. No distractions. Just tools that help you train,
+            review, and improve consistently.
+          </p>
         </div>
-    </section>
 
-    <section class="section" id="apps">
-        <div class="container">
-            <h2 class="section-title">Available Tools</h2>
-            <div class="apps-grid">
-                <div class="app-card recommended" id="focus-timer">
-                    <div class="app-header">
-                        <div>
-                            <div class="app-name">FocusTimer</div>
-                        </div>
-                        <span class="app-tag tag-free">Free</span>
-                    </div>
-                    <p class="app-description">A simple timer that helps you track focused work sessions and see how much time you spend on specific tasks.</p>
-                    <div class="app-price">Free</div>
-                    <a href="https://app.example.com/focustimer" class="btn btn-primary app-cta">Open Tool</a>
-                </div>
-
-                <div class="app-card">
-                    <div class="app-header">
-                        <div>
-                            <div class="app-name">TaskFlow</div>
-                        </div>
-                        <span class="app-tag tag-new">New</span>
-                    </div>
-                    <p class="app-description">Create and organize your daily to-do list. Add tasks, mark them complete, and see what needs to get done.</p>
-                    <div class="app-price">$9/mo</div>
-                    <a href="https://app.example.com/taskflow" class="btn btn-primary app-cta">Open Tool</a>
-                </div>
-
-                <div class="app-card">
-                    <div class="app-header">
-                        <div>
-                            <div class="app-name">InvoiceSnap</div>
-                        </div>
-                        <span class="app-tag tag-paid">Paid</span>
-                    </div>
-                    <p class="app-description">Create professional invoices and send them to clients. Track which invoices have been paid and send payment reminders.</p>
-                    <div class="app-price">$15/mo</div>
-                    <a href="https://app.example.com/invoicesnap" class="btn btn-primary app-cta">Open Tool</a>
-                </div>
-
-                <div class="app-card">
-                    <div class="app-header">
-                        <div>
-                            <div class="app-name">LinkHub</div>
-                        </div>
-                        <span class="app-tag tag-paid">Paid</span>
-                    </div>
-                    <p class="app-description">Create a single page with all your important links. Share one link instead of multiple social media profiles and websites.</p>
-                    <div class="app-price">$5/mo</div>
-                    <a href="https://app.example.com/linkhub" class="btn btn-primary app-cta">Open Tool</a>
-                </div>
-
-                <div class="app-card">
-                    <div class="app-header">
-                        <div>
-                            <div class="app-name">EmailClean</div>
-                        </div>
-                        <span class="app-tag tag-paid">Paid</span>
-                    </div>
-                    <p class="app-description">Organize your inbox automatically. Sort newsletters, promotional emails, and spam into separate folders so your inbox stays clean.</p>
-                    <div class="app-price">$12/mo</div>
-                    <a href="https://app.example.com/emailclean" class="btn btn-primary app-cta">Open Tool</a>
-                </div>
-
-                <div class="app-card">
-                    <div class="app-header">
-                        <div>
-                            <div class="app-name">MeetingKit</div>
-                        </div>
-                        <span class="app-tag tag-paid">Paid</span>
-                    </div>
-                    <p class="app-description">Take meeting notes and assign action items. Automatically create summaries you can share with your team after the meeting.</p>
-                    <div class="app-price">$19/mo</div>
-                    <a href="https://app.example.com/meetingkit" class="btn btn-primary app-cta">Open Tool</a>
-                </div>
-            </div>
+        <div class="feature">
+          <h3>Built for Real Fighters</h3>
+          <p>
+            Designed by practitioners who understand southpaw challenges in real
+            sparring and competition environments.
+          </p>
         </div>
-    </section>
+      </div>
+    </div>
+  </section>
 
-    <section class="closing">
-        <div class="container">
-            <p>Each tool opens independently. Payments are processed securely per tool when you subscribe. Clear pricing. No unnecessary features.</p>
-        </div>
-    </section>
+  <section class="closing">
+    <div class="container">
+      <p>
+        Southpaw IQ is designed to support your training process.
+        No accounts required to start. Optional upgrades may be added over time.
+        Availability and features may evolve as the app grows.
+      </p>
+    </div>
+  </section>
 
-    <footer>
-        <div class="container">
-            <div class="footer-logo">CousinIve</div>
-            <div class="footer-contact">
-                <p>cousinive@outlook.com</p>
-                <p>@cousinive on Instagram and X</p>
-            </div>
-        </div>
-    </footer>
+  <footer>
+    <div class="container">
+      <p>© Southpaw IQ · Built for iPhone</p>
+    </div>
+  </footer>
 
-    <script>
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            });
-        });
-    </script>
 </body>
 </html>
-<p><a href="apps/calculator/">Calculator</a></p>
